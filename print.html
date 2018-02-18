@@ -1,0 +1,320 @@
+<!DOCTYPE HTML>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title></title>
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <base href="">
+
+        <link rel="stylesheet" href="book.css">
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
+        <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:500" rel="stylesheet" type="text/css">
+
+        <link rel="shortcut icon" href="favicon.png">
+
+        <!-- Font Awesome -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme -->
+        
+
+        
+
+        <!-- Fetch Clipboard.js from CDN but have a local fallback -->
+        <script src="https://cdn.jsdelivr.net/clipboard.js/1.6.1/clipboard.min.js"></script>
+        <script>
+            if (typeof Clipboard == 'undefined') {
+                document.write(unescape("%3Cscript src='clipboard.min.js'%3E%3C/script%3E"));
+            }
+        </script>
+
+        <!-- Fetch JQuery from CDN but have a local fallback -->
+        <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+        <script>
+            if (typeof jQuery == 'undefined') {
+                document.write(unescape("%3Cscript src='jquery.js'%3E%3C/script%3E"));
+            }
+        </script>
+
+        <!-- Fetch store.js from local - TODO add CDN when 2.x.x is available on cdnjs -->
+        <script src="store.js"></script>
+
+        <!-- Custom JS script -->
+        
+
+    </head>
+    <body class="light">
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme = store.get('theme');
+            if (theme === null || theme === undefined) { theme = 'light'; }
+            $('body').removeClass().addClass(theme);
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var sidebar = store.get('sidebar');
+            if (sidebar === "hidden") { $("html").addClass("sidebar-hidden") }
+            else if (sidebar === "visible") { $("html").addClass("sidebar-visible") }
+        </script>
+
+        <div id="sidebar" class="sidebar">
+            <ul class="chapter"><li><a href="./introduction.html"><strong>1.</strong> Introduction</a></li><li><a href="./background-and-concepts.html"><strong>2.</strong> Background And Concepts</a></li><li><a href="./setup.html"><strong>3.</strong> Setup</a></li><li><a href="./hello-world.html"><strong>4.</strong> Hello World</a></li><li><a href="./tools.html"><strong>5.</strong> Tools</a></li><li><a href="./workflows.html"><strong>6.</strong> Workflows</a></li><li><a href="./js-ffi.html"><strong>7.</strong> JavaScript Interoperation</a></li></ul>
+        </div>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page" tabindex="-1">
+                <div id="menu-bar" class="menu-bar">
+                    <div class="left-buttons">
+                        <i id="sidebar-toggle" class="fa fa-bars"></i>
+                        <i id="theme-toggle" class="fa fa-paint-brush"></i>
+                    </div>
+
+                    <h1 class="menu-title"></h1>
+
+                    <div class="right-buttons">
+                        <i id="print-button" class="fa fa-print" title="Print this book"></i>
+                    </div>
+                </div>
+
+                <div id="content" class="content">
+                    <p>This small book describes how to use <a href="https://www.rust-lang.org">Rust</a> and <a href="http://webassembly.org/">WebAssembly</a> together.</p>
+<p><a href="https://rust-lang-nursery.github.io/rust-wasm/">This book is open source! Find a typo? Did we overlook something? Send us a pull
+request!</a></p>
+<a class="header" href="print.html#background-and-concepts" id="background-and-concepts"><h1>Background and Concepts</h1></a>
+<a class="header" href="print.html#web-assembly" id="web-assembly"><h2>Web Assembly</h2></a>
+<p>WebAssembly is a simple machine model and executable format with an <a href="https://webassembly.github.io/spec/">extensive
+specification</a>.</p>
+<p>Although it has currently gathered attention in the JavaScript and web communities in general,
+it makes no assumptions about its host environment. Thus, it makes sense to think that <em>wasm</em>
+will become an important &quot;portable executable&quot; format used in a variety of contexts in the near
+future (we will dedicate some time to take a closer look at <em>wasm</em>'s portability features further in the book).</p>
+<p>As of <em>today</em>, however, <em>wasm</em> is mostly related to JavaScript, which comes in many flavors (including both
+browsers and <a href="https://nodejs.org">Node.js</a>). Due to JS being widespread and easy to access we will focus mostly on using these
+platforms to run Rust-generated <em>wasm</em>, but other intepreters are probably going to be released in the near future.</p>
+<p>As a programming language, WebAssembly is comprised of two formats: The binary format and the text format.
+Both represent a common structure, albeit in different ways. The text format (generally called <code>wat</code>) uses
+<a href="https://en.wikipedia.org/wiki/S-expression">S-expressions</a>, which bears some resemblance to languages like Clojure or Racket.
+The binary format <code>wasm</code> is a lower level format, being itself the assembly code which is ran by the intepreters.</p>
+<p>For reference, here is a factorial function in <code>wat</code>:</p>
+<pre><code>(module
+  (func $fac (param f64) (result f64)
+    get_local 0
+    f64.const 1
+    f64.lt
+    if (result f64)
+      f64.const 1
+    else
+      get_local 0
+      get_local 0
+      f64.const 1
+      f64.sub
+      call $fac
+      f64.mul
+    end)
+  (export &quot;fac&quot; (func $fac)))
+</code></pre>
+<p>If you're curious about how a <code>wasm</code> file looks like you can use <a href="https://cdn.rawgit.com/WebAssembly/wabt/aae5a4b7/demo/wat2wasm/">wat2wasm demo</a> with the above code.</p>
+<p>WebAssembly has a very simple <a href="https://webassembly.github.io/spec/core/syntax/modules.html#syntax-mem">memory model</a>. At the moment, a wasm module has access to a single
+&quot;linear memory&quot;, which is essentially a flat array of a fixed
+numeric type. This <a href="https://webassembly.github.io/spec/core/syntax/instructions.html#syntax-instr-memory">memory can be grown</a> by a multiple of the page size (64K),
+and cannot be shrunk.</p>
+<a class="header" href="print.html#getting-started" id="getting-started"><h1>Getting Started</h1></a>
+<p>If you want to be able to use Rust for wasm then you need an environment to be able to do that! If
+you haven't already you'll need to install <a href="https://www.rustup.rs/">rustup</a> the official tool in order to install
+and manage different versions of the Rust compiler. Follow the instructions on the site to get it
+installed on your machine. Once that's installed you'll need to get the <code>wasm32-unknown-unknown</code>
+toolchain.</p>
+<pre><code class="language-bash">$ rustup target add wasm32-unknown-unknown --toolchain nightly
+</code></pre>
+<p>Next up if you're interested in making small wasm binaries you'll want to
+install the <a href="https://github.com/alexcrichton/wasm-gc">wasm-gc</a> tool to make smaller binaries and to work around bugs
+in the compiler toolchain for now:</p>
+<pre><code>$ cargo install --git https://github.com/alexcrichton/wasm-gc
+</code></pre>
+<p>And finally if you're <em>really</em> interested in making small wasm binaries you'll
+want to install <code>wasm-opt</code> from the <a href="https://github.com/WebAssembly/binaryen">binaryen toolkit</a>.</p>
+<a class="header" href="print.html#hello-world-for-wasm32-unknown-unknown" id="hello-world-for-wasm32-unknown-unknown"><h1>&quot;Hello World&quot; for <code>wasm32-unknown-unknown</code></h1></a>
+<p>A basic &quot;hello world&quot; can be generated with:</p>
+<pre><code>$ cargo +nightly new hello-world
+</code></pre>
+<p>Next up change <code>Cargo.toml</code> to have:</p>
+<pre><code class="language-toml">[lib]
+crate-type = [&quot;cdylib&quot;]
+</code></pre>
+<p>and edit <code>src/lib.rs</code> to contain:</p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+#[no_mangle]
+pub extern fn add_one(a: u32) -&gt; u32 {
+    a + 1
+}
+#}</code></pre></pre>
+<p>Now prepare the wasm binary with:</p>
+<pre><code>$ cargo +nightly build --target wasm32-unknown-unknown --release
+
+# make the binary a little smaller (working around bugs in rustc toolchain)
+$ wasm-gc target/wasm32-unknown-unknown/release/hello_world.wasm -o hello_world.gc.wasm
+
+# make the binary *even smaller* if you installed `wasm-opt`
+$ wasm-opt -Os hello_world.gc.wasm -o hello_world.gc.opt.wasm
+</code></pre>
+<p>And we can test it out with:</p>
+<pre><code class="language-html">&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;script&gt;
+      WebAssembly.instantiateStreaming(fetch('hello_world.gc.opt.wasm'))
+        .then(wasm_module =&gt; {
+            alert(`2 + 1 = ${wasm_module.instance.exports.add_one(2)}`);
+        });
+    &lt;/script&gt;
+  &lt;/head&gt;
+  &lt;body&gt;&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>Note: To run with <code>instantiateStreaming</code> and <code>compileStreaming</code>, you need your webserver to serve <code>.wasm</code> file with <code>application/wasm</code> MIME type.</p>
+<p>Alternatively, if you are running locally without any webserver.</p>
+<pre><code class="language-html">&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;script&gt;
+      fetch('hello_world.gc.opt.wasm')
+        .then(r =&gt; r.arrayBuffer())
+        .then(r =&gt; WebAssembly.instantiate(r))
+        .then(wasm_module =&gt; {
+            alert(`2 + 1 = ${wasm_module.instance.exports.add_one(2)}`);
+        });
+    &lt;/script&gt;
+  &lt;/head&gt;
+  &lt;body&gt;&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<a class="header" href="print.html#tools" id="tools"><h1>Tools</h1></a>
+<p>Now that we've have learned how to generate our first WebAssembly &quot;Hello World&quot; with Rust,
+it is time to check out what tooling is available in the language.
+There are several great tools already written for WebAssembly (most of them written in C++).
+<a href="https://github.com/WebAssembly/wabt">Wabt</a>, for instance, is a suite of tools built to be a starting point for manipulating WebAssembly files.</p>
+<p>However, since Rust has the potential to be used for both development and tooling for WebAssembly, several tools written in it have popped up in the ecosystem:</p>
+<ul>
+<li><a href="https://github.com/alexcrichton/wasm-gc">wasm-gc</a> - a small command to gc a wasm module and remove all unneeded exports, imports, functions, etc.</li>
+<li><a href="https://github.com/fitzgen/wasm-nm">wasm-nm</a> - list the symbols within a wasm file.</li>
+<li><a href="https://github.com/fitzgen/wasm-snip">wasm-snip</a> - replaces a wasm function body with unreachable</li>
+<li><a href="https://github.com/joshuawarner32/rust-wasm">rustwasm</a> - A wasm interpreter in Rust</li>
+<li><a href="https://github.com/pepyakin/wasmi">wasmi</a> - Another wasm interpreter in Rust</li>
+<li><a href="https://github.com/paritytech/parity-wasm">parity-wasm</a> - wasm (de)serialization in Rust</li>
+<li><a href="https://github.com/yurydelendik/wasmparser.rs">wasmparser</a> - A wasm binary decoder with optional validation, in Rust</li>
+<li><a href="https://github.com/yurydelendik/wasmtext">wasmtext</a> - prints wasm modules in text format, in Rust</li>
+<li><a href="https://github.com/sunfishcode/wasmstandalone">wasmstandalone</a> - standalone JIT-based wasm runner, in Rust, using Cretonne, in early development</li>
+</ul>
+<p>There's also plenty of <em>space for tooling to be be built or rewritten in Rust</em> for better syngerny with the ecosystem. Some of them include:</p>
+<ul>
+<li><a href="https://github.com/rust-lang-nursery/rust-wasm/issues/20">A wasm size profiler</a></li>
+<li>A <a href="https://github.com/WebAssembly/wabt">Wabt</a> rewrite in Rust</li>
+<li>Tools for the <a href="https://github.com/ewasm">ewasm project</a></li>
+</ul>
+<p>This page is meant to be a living document, so feel free to send us a pull request adding new incredible WebAssembly tools we might have missed or when they are released in the future!</p>
+<a class="header" href="print.html#common-rustwasm-workflows" id="common-rustwasm-workflows"><h1>Common Rust+wasm Workflows</h1></a>
+<p>This document is intended to currently collect a number of workflows related to
+Rust+wasm over time. Right now it's not necessarily the most organized, but that
+may come soon!</p>
+<a class="header" href="print.html#javascript-interoperation" id="javascript-interoperation"><h1>JavaScript Interoperation</h1></a>
+<a class="header" href="print.html#importing-and-exporting-js-functions" id="importing-and-exporting-js-functions"><h3>Importing and exporting JS functions</h3></a>
+<a class="header" href="print.html#from-the-rust-side" id="from-the-rust-side"><h4>From the Rust side</h4></a>
+<blockquote>
+<p><strong>Note</strong>: this is likely to <a href="https://github.com/rust-lang-nursery/rust-wasm/issues/29">change in the near future</a></p>
+</blockquote>
+<p>When using wasm within a JS host, importing and exporting functions from the
+Rust side is straightforward: it works exactly like C. In particular:</p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+// import a JS function called `foo`
+extern { fn foo(); }
+
+// export a Rust function called `bar`
+#[no_mangle]
+pub extern fn bar() { /* ... */ }
+#}</code></pre></pre>
+<p>Because of wasm's limited value types, these functions must operate only on
+primitive numeric types.</p>
+<a class="header" href="print.html#from-the-js-side" id="from-the-js-side"><h4>From the JS side</h4></a>
+<p>Within JS, a wasm binary turns into an ES6 module. It must be <em>instantiated</em>
+with a linear memory and set of JS functions matching the expected imports. The
+details of instantiation are available on <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WebAssembly/instantiate">MDN</a>.</p>
+<p>The resulting ES6 module will contain all of functions exported from Rust, now
+available as JS functions.</p>
+<p><a href="https://www.hellorust.com/demos/add/index.html">Here</a> is a very simple example of the whole setup in action.</p>
+<a class="header" href="print.html#going-beyond-numerics" id="going-beyond-numerics"><h3>Going beyond numerics</h3></a>
+<p>When using wasm within JS, there is a sharp split between the wasm module's
+memory and the JS memory:</p>
+<ul>
+<li>
+<p>Each wasm module has a linear memory (described at the top of this document),
+which is initialized during instantiation. <strong>JS code can freely read and write
+to this memory</strong>.</p>
+</li>
+<li>
+<p>By contrast, wasm code has no <em>direct</em> access to JS objects.</p>
+</li>
+</ul>
+<p>Thus, sophisticated interop happens in two main ways:</p>
+<ul>
+<li>
+<p>Copying in or out binary data to the wasm memory. For example, this is one way
+to provide an owned <code>String</code> to the Rust side.</p>
+</li>
+<li>
+<p>Setting up an explicit &quot;heap&quot; of JS objects which are then given
+&quot;addresses&quot;. This allows wasm code to refer to JS objects indirectly (using
+integers), and operate on those objects by invoking imported JS functions.</p>
+</li>
+</ul>
+<p>Fortunately, this interop story is very amenable to treatment through a generic
+&quot;bindgen&quot;-style framework: <a href="https://github.com/alexcrichton/wasm-bindgen">wasm-bindgen</a>. The framework makes it possible to
+write idiomatic Rust function signatures that map to idiomatic JS functions,
+automatically.</p>
+
+                </div>
+
+                <!-- Mobile navigation buttons -->
+                
+
+                
+
+            </div>
+
+            
+
+            
+
+        </div>
+
+
+        <!-- Local fallback for Font Awesome -->
+        <script>
+            if ($(".fa").css("font-family") !== "FontAwesome") {
+                $('<link rel="stylesheet" type="text/css" href="_FontAwesome/css/font-awesome.css">').prependTo('head');
+            }
+        </script>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        
+
+        
+
+        
+
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+    </body>
+</html>
